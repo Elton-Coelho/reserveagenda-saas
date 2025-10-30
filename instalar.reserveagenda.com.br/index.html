@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="index,follow">
+  <meta name="description" content="Instalador oficial ReserveAgenda v1.2 – Instale o sistema de agendamento SaaS completo com um único comando.">
+  <meta property="og:title" content="Instalador ReserveAgenda v1.2 | Grupo Shark">
+  <meta property="og:description" content="Execute o comando e instale automaticamente a plataforma ReserveAgenda com suporte multiempresa e SSL.">
+  <meta property="og:image" content="https://instalar.reserveagenda.com.br/banner-installer.webp">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#0e004d">
+  <title>Instalador ReserveAgenda v1.2 | Grupo Shark</title>
+  <style>
+    body {font-family: Arial, sans-serif;background:#0e004d;color:#fff;text-align:center;padding:50px;}
+    h1 {color:#00ffcc;font-size:2em;margin-bottom:10px;}
+    code {background:#222;padding:8px 14px;border-radius:6px;font-size:15px;display:inline-block;margin-top:10px;}
+    button {margin-top:15px;padding:10px 24px;border:none;border-radius:8px;cursor:pointer;background:#00ffcc;color:#0e004d;font-weight:bold;transition:all .2s;}
+    button:hover {background:#00e0b5;}
+    footer {margin-top:50px;font-size:14px;color:#bbb;line-height:1.6;}
+  </style>
+</head>
+<body>
+  <h1>🚀 Instalador ReserveAgenda v1.2</h1>
+  <p>Execute o comando abaixo na sua VPS (Ubuntu 22.04+) para iniciar a instalação automática:</p>
+  <code id="cmd">curl -sSL instalar.reserveagenda.com.br | sudo bash</code><br>
+  <button onclick="copy()">📋 Copiar comando</button>
+  <footer>
+    Desenvolvido por <strong>Grupo Shark</strong> — Super Zapp / ReserveAgenda<br>
+    Versão 1.2 • Multiempresa • SSL Automático
+  </footer>
+  <script>
+    function copy(){navigator.clipboard.writeText(document.getElementById('cmd').innerText);alert("✅ Comando copiado com sucesso!");}
+  </script>
+</body>
+</html>
