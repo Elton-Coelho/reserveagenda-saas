@@ -2,29 +2,23 @@
 # ==========================================================
 # ReserveAgenda - Instalador Automático (index.sh)
 # Autor: Grupo Shark / Super Zapp
-# Versão: 1.2b (Laravel 12 / PHP 8.3)
+# Versão: 1.2c (Laravel 12 / PHP 8.3)
 # ==========================================================
 
 set -euo pipefail
 IFS=$'\n\t'
 
-# -------------------------
-# Funções visuais
-# -------------------------
 info(){ echo -e "\e[1;34m[INFO]\e[0m $*"; }
 warn(){ echo -e "\e[1;33m[AVISO]\e[0m $*"; }
-err(){ echo -e "\e[1;31m[ERRO]\e[0m $*"; }
-confirm(){ read -r -p "$* [y/N]: " ans; [[ "$ans" = "y" || "$ans" = "Y" ]]; }
+err(){  echo -e "\e[1;31m[ERRO]\e[0m $*"; }
 
-# -------------------------
-# Entrada de dados
-# -------------------------
 echo
 info "🧠 Iniciando instalador automático do sistema ReserveAgenda..."
 
 DEFAULT_URL="https://github.com/Elton-Coelho/reserveagenda-saas/raw/main/releases/reserveagenda-tools-v1.2.zip"
 read -r -p "URL do pacote (ZIP) [${DEFAULT_URL}]: " REPO_URL
 REPO_URL=${REPO_URL:-$DEFAULT_URL}
+REPO_URL=$(echo "$REPO_URL" | tr -d '\r')
 
 read -r -p "Nome da empresa (APP_NAME) [ReserveAgenda]: " APP_NAME
 APP_NAME=${APP_NAME:-ReserveAgenda}
@@ -45,33 +39,19 @@ if [[ "$USE_MYSQL" =~ ^[Yy] ]]; then
   read -r -p "DB_USERNAME [usuario]: " DB_USERNAME; DB_USERNAME=${DB_USERNAME:-usuario}
   read -r -p "DB_PASSWORD [senha]: " DB_PASSWORD; DB_PASSWORD=${DB_PASSWORD:-senha}
 else
-  DB_HOST="localhost"
-  DB_PORT="3306"
-  DB_DATABASE="sqlite"
-  DB_USERNAME=""
-  DB_PASSWORD=""
+  DB_HOST="localhost"; DB_PORT="3306"; DB_DATABASE="sqlite"; DB_USERNAME=""; DB_PASSWORD=""
 fi
 
-# -------------------------
-# Instala pacotes base
-# -------------------------
 info "🔧 Instalando pacotes necessários..."
 apt update -y && apt install -y unzip curl git apache2 php php-cli php-mbstring php-xml php-curl php-zip composer libapache2-mod-php php-sqlite3 php-mysql
-
 a2enmod rewrite headers >/dev/null 2>&1 || true
 systemctl enable apache2 >/dev/null 2>&1
 
-# -------------------------
-# Prepara diretório
-# -------------------------
 info "📁 Criando estrutura de pastas..."
 rm -rf "$APP_PATH"
 mkdir -p "$APP_PATH"
 cd "$APP_PATH"
 
-# -------------------------
-# Download do pacote
-# -------------------------
 info "⬇️ Baixando pacote de instalação..."
 curl -L -o /tmp/reserveagenda-tools.zip "$REPO_URL"
 
@@ -81,18 +61,12 @@ if [[ ! -s /tmp/reserveagenda-tools.zip ]]; then
 fi
 
 unzip -q /tmp/reserveagenda-tools.zip -d /tmp/reserveagenda-tools
-cd /tmp/reserveagenda-tools/reserveagenda-tools-v1.2b || cd /tmp/reserveagenda-tools
+cd /tmp/reserveagenda-tools || exit 1
 
-# -------------------------
-# Executa script principal
-# -------------------------
 info "⚙️ Executando instalador interno..."
 chmod +x reserveagenda.sh || true
 bash reserveagenda.sh "$APP_PATH" "$APP_NAME" "$APP_DOMAIN" "$USE_MYSQL" "$DB_HOST" "$DB_PORT" "$DB_DATABASE" "$DB_USERNAME" "$DB_PASSWORD"
 
-# -------------------------
-# Apache
-# -------------------------
 VHOST_FILE="/etc/apache2/sites-available/${APP_DOMAIN}.conf"
 info "🌐 Criando VirtualHost..."
 cat > "$VHOST_FILE" <<EOF
@@ -100,12 +74,10 @@ cat > "$VHOST_FILE" <<EOF
     ServerAdmin admin@${APP_DOMAIN}
     ServerName ${APP_DOMAIN}
     DocumentRoot ${APP_PATH}/public
-
     <Directory ${APP_PATH}/public>
         AllowOverride All
         Require all granted
     </Directory>
-
     ErrorLog \${APACHE_LOG_DIR}/${APP_DOMAIN}-error.log
     CustomLog \${APACHE_LOG_DIR}/${APP_DOMAIN}-access.log combined
 </VirtualHost>
@@ -114,9 +86,6 @@ EOF
 a2ensite "${APP_DOMAIN}.conf" >/dev/null 2>&1
 systemctl reload apache2
 
-# -------------------------
-# Finalização
-# -------------------------
 info "✅ Instalação concluída com sucesso!"
 echo
 echo "Acesse:"
