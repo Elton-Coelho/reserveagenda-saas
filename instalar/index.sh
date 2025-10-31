@@ -1,10 +1,4 @@
 #!/usr/bin/env bash
-# ==========================================================
-# ReserveAgenda - Instalador Automático (index.sh)
-# Autor: Grupo Shark / Super Zapp
-# Versão: 1.2c (Laravel 12 / PHP 8.3)
-# ==========================================================
-
 set -euo pipefail
 IFS=$'\n\t'
 
@@ -18,7 +12,7 @@ info "🧠 Iniciando instalador automático do sistema ReserveAgenda..."
 DEFAULT_URL="https://github.com/Elton-Coelho/reserveagenda-saas/raw/main/releases/reserveagenda-tools-v1.2.zip"
 read -r -p "URL do pacote (ZIP) [${DEFAULT_URL}]: " REPO_URL
 REPO_URL=${REPO_URL:-$DEFAULT_URL}
-REPO_URL=$(echo "$REPO_URL" | tr -d '\r')
+REPO_URL=$(echo "$REPO_URL" | tr -d '\r' | xargs)
 
 read -r -p "Nome da empresa (APP_NAME) [ReserveAgenda]: " APP_NAME
 APP_NAME=${APP_NAME:-ReserveAgenda}
@@ -53,10 +47,10 @@ mkdir -p "$APP_PATH"
 cd "$APP_PATH"
 
 info "⬇️ Baixando pacote de instalação..."
-curl -L -o /tmp/reserveagenda-tools.zip "$REPO_URL"
+curl -L --fail -o /tmp/reserveagenda-tools.zip "$REPO_URL" || { err "Falha ao baixar o pacote."; exit 1; }
 
 if [[ ! -s /tmp/reserveagenda-tools.zip ]]; then
-  err "Falha ao baixar o pacote de instalação."
+  err "O arquivo ZIP baixado está vazio ou corrompido."
   exit 1
 fi
 
