@@ -1,21 +1,22 @@
-# 🧭 ReserveAgenda SaaS Installer (v1.2)
+===================================================
+ ReserveAgenda - Instalação Automática
+===================================================
 
-Repositório público responsável pela instalação automatizada do sistema ReserveAgenda.
+Para instalar em qualquer VPS (Ubuntu 22/24 LTS):
 
-## ⚙️ Estrutura
-- **instalar/** → scripts de instalação
-- **releases/** → pacote de ferramentas e instalador principal
-- **assets/** → logos, banners e áudios
+1️⃣ Execute:
+    sudo su
+    curl -sSL https://raw.githubusercontent.com/Elton-Coelho/reserveagenda-saas/main/instalar/index.sh | bash
 
-## 🚀 Instalação rápida
-Execute o comando abaixo em sua VPS (Ubuntu 22.04+):
+2️⃣ Siga as instruções do instalador:
+    - Informe o nome da empresa
+    - Domínio/IP
+    - Dados do banco (opcional)
 
-```bash
-curl -sSL instalar.reserveagenda.com.br | sudo bash
-```
+3️⃣ Ao final acesse:
+    - http://SEU_DOMINIO/saude
+    - http://SEU_DOMINIO/info.php
 
-## 🔒 Integração com Core Privado
-O instalador clona o repositório privado `reserveagenda-core` usando token seguro no `.secrets.env`.
-
-## 📦 Desenvolvido por
-Grupo Shark • Super Zapp / ReserveAgenda
+===================================================
+Suporte Técnico: contato.super.zapp@gmail.com
+===================================================
