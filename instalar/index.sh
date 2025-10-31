@@ -21,13 +21,15 @@ confirm(){ read -r -p "$* [y/N]: " ans; [[ "$ans" = "y" || "$ans" = "Y" ]]; }
 # -------------------------
 echo
 info "🧠 Iniciando instalador automático do sistema ReserveAgenda..."
-read -r -p "URL do pacote (ZIP) [https://github.com/Elton-Coelho/reserveagenda-saas/raw/main/releases/reserveagenda-tools-v1.2b.zip]: " REPO_URL
-REPO_URL=${REPO_URL:-https://github.com/Elton-Coelho/reserveagenda-saas/raw/main/releases/reserveagenda-tools-v1.2b.zip}
+
+DEFAULT_URL="https://github.com/Elton-Coelho/reserveagenda-saas/raw/main/releases/reserveagenda-tools-v1.2.zip"
+read -r -p "URL do pacote (ZIP) [${DEFAULT_URL}]: " REPO_URL
+REPO_URL=${REPO_URL:-$DEFAULT_URL}
 
 read -r -p "Nome da empresa (APP_NAME) [ReserveAgenda]: " APP_NAME
 APP_NAME=${APP_NAME:-ReserveAgenda}
 
-read -r -p "Dominio ou IP (sem http://) [144.126.135.75]: " APP_DOMAIN
+read -r -p "Domínio ou IP (sem http://) [144.126.135.75]: " APP_DOMAIN
 APP_DOMAIN=${APP_DOMAIN:-144.126.135.75}
 
 read -r -p "Diretório de instalação [/home/deploy/reserveagenda]: " APP_PATH
@@ -42,6 +44,12 @@ if [[ "$USE_MYSQL" =~ ^[Yy] ]]; then
   read -r -p "DB_DATABASE [reserveagenda]: " DB_DATABASE; DB_DATABASE=${DB_DATABASE:-reserveagenda}
   read -r -p "DB_USERNAME [usuario]: " DB_USERNAME; DB_USERNAME=${DB_USERNAME:-usuario}
   read -r -p "DB_PASSWORD [senha]: " DB_PASSWORD; DB_PASSWORD=${DB_PASSWORD:-senha}
+else
+  DB_HOST="localhost"
+  DB_PORT="3306"
+  DB_DATABASE="sqlite"
+  DB_USERNAME=""
+  DB_PASSWORD=""
 fi
 
 # -------------------------
@@ -65,15 +73,21 @@ cd "$APP_PATH"
 # Download do pacote
 # -------------------------
 info "⬇️ Baixando pacote de instalação..."
-curl -L -o reserveagenda-tools.zip "$REPO_URL"
-unzip -q reserveagenda-tools.zip -d /tmp/reserveagenda-tools
+curl -L -o /tmp/reserveagenda-tools.zip "$REPO_URL"
+
+if [[ ! -s /tmp/reserveagenda-tools.zip ]]; then
+  err "Falha ao baixar o pacote de instalação."
+  exit 1
+fi
+
+unzip -q /tmp/reserveagenda-tools.zip -d /tmp/reserveagenda-tools
 cd /tmp/reserveagenda-tools/reserveagenda-tools-v1.2b || cd /tmp/reserveagenda-tools
 
 # -------------------------
 # Executa script principal
 # -------------------------
 info "⚙️ Executando instalador interno..."
-chmod +x reserveagenda.sh
+chmod +x reserveagenda.sh || true
 bash reserveagenda.sh "$APP_PATH" "$APP_NAME" "$APP_DOMAIN" "$USE_MYSQL" "$DB_HOST" "$DB_PORT" "$DB_DATABASE" "$DB_USERNAME" "$DB_PASSWORD"
 
 # -------------------------
@@ -91,10 +105,13 @@ cat > "$VHOST_FILE" <<EOF
         AllowOverride All
         Require all granted
     </Directory>
+
+    ErrorLog \${APACHE_LOG_DIR}/${APP_DOMAIN}-error.log
+    CustomLog \${APACHE_LOG_DIR}/${APP_DOMAIN}-access.log combined
 </VirtualHost>
 EOF
 
-a2ensite "${APP_DOMAIN}.conf"
+a2ensite "${APP_DOMAIN}.conf" >/dev/null 2>&1
 systemctl reload apache2
 
 # -------------------------
